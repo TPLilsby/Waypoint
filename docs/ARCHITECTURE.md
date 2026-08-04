@@ -50,7 +50,8 @@ Waypoint uses Supabase Auth with three client entry points, following the
 - `src/lib/supabase/server.ts` - server client, used in Server Components,
   Server Actions, and Route Handlers
 - `src/lib/supabase/middleware.ts` - refreshes the session cookie on every
-  request via `src/middleware.ts`, so a Server Component never sees a stale
+  request via `src/proxy.ts` (Next.js renamed the `middleware` file
+  convention to `proxy` in v16), so a Server Component never sees a stale
   or expired session
 
 Data access control is enforced at the database level with Row Level
@@ -73,15 +74,54 @@ without a profile.
 
 ## Map rendering
 
-Leaflet with open TopoJSON boundary data, rather than a hosted map provider
-(Mapbox, Google Maps). Reasoning:
+`react-simple-maps` (D3 + SVG) with open TopoJSON boundary data
+(`world-atlas`, `us-atlas`), rather than a hosted tile provider (Mapbox,
+Google Maps) or a WebGL 3D globe. Reasoning:
 
 - No API key or usage-based billing to manage for something that's
   fundamentally static polygon data
 - The map doesn't need street-level detail, satellite imagery, or routing -
   just country/state boundaries and point markers, which open boundary
   datasets cover fully
+- It's plain SVG, so hover/click effects are ordinary CSS transitions on
+  `<path>` elements - no separate rendering pipeline to keep in sync
 - Keeps the entire stack inside free, unmetered tiers (see below)
+
+A 3D WebGL globe (e.g. `react-globe.gl`) was considered and rejected for
+now: it looks great rotating, but it doesn't naturally "flatten" into a
+readable flat map when you zoom in - that would mean running two separate
+renderers and syncing state between them. `react-simple-maps` lets us get
+a globe-like zoomed-out view with a plain 2D technique instead (see below),
+which is a smaller, single-renderer problem.
+
+### Base coloring and status indicators
+
+Each country/state gets a distinct color purely for visual variety - the
+color carries no meaning and is unrelated to visited/want-to-visit status.
+Status is layered on top of the same `<path>`, not encoded in fill color:
+
+- **Visited**: a small icon (e.g. a checkmark) rendered on the shape
+- **Want to visit**: the shape's own stroke (its border) pulses in opacity/
+  width - there's no separate "ring" element, since a country is already
+  just an SVG path with a fill and a stroke
+- **Hover**: a quick scale-up transform on the path (the "pop"), eased with
+  a slight overshoot so it feels springy rather than mechanical
+
+Known edge case to handle when we build this: very small countries
+(Monaco, Vatican City, Luxembourg) may render the pulsing stroke as
+imperceptible at world-map zoom. A minimum stroke width, or a subtle
+`feGaussianBlur` glow around the path, are both reasonable fixes -
+deferred until we're actually looking at the rendered map, not decided
+up front.
+
+### Zoom-to-globe (stretch goal for phase 1b)
+
+The "flattens out zoomed in, looks like a globe zoomed out" effect is a
+known D3 technique: interpolate the map's projection between a flat
+projection (e.g. `geoEqualEarth`) and `geoOrthographic` (a true globe
+projection, still rendered as flat SVG/Canvas - no WebGL) based on zoom
+level. This is more involved than the base map, so it's staged as its own
+step (1b-iv) rather than a blocker for getting the map on screen at all.
 
 ## Third-party data sources
 
