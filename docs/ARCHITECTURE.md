@@ -72,6 +72,26 @@ A `handle_new_user` trigger on `auth.users` auto-creates a matching
 `profiles` row on signup, so the app never has to handle a signed-in user
 without a profile.
 
+### Sign up, log in, log out
+
+Each lives in its own `actions.ts` next to its page (`src/app/login/`,
+`src/app/signup/`, `src/app/dashboard/`) as a Server Function, invoked from
+a form via React's `useActionState` so the page can show a pending state
+and inline error text without a separate client-side fetch/API route.
+
+Email confirmation is left on (Supabase's default) rather than disabled for
+convenience: it's a real, production-shaped flow to show, and it costs
+nothing to keep on since Supabase sends the confirmation email itself.
+The trade-off is explicit - `signup`'s Server Function returns a "check
+your inbox" state instead of redirecting to `/dashboard`, since the user
+isn't actually signed in until they click the email link.
+
+Route protection lives in `src/app/dashboard/layout.tsx`, which calls
+`getUser()` and redirects to `/login` if there's no session - not in
+`src/proxy.ts`, which stays focused on the one job of refreshing the
+session cookie. Keeping those concerns separate means a bug in route
+matching can't accidentally also break session refresh for the whole app.
+
 ## Map rendering
 
 `react-simple-maps` (D3 + SVG) with open TopoJSON boundary data

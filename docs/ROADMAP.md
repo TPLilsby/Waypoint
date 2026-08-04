@@ -9,7 +9,7 @@ wired for long.
 - [ ] **Phase 1 - Foundation**: auth, world map and US state map with
   click-to-toggle status, private dashboard view. Broken into small steps so
   something is visibly working after each one - see below.
-  - [ ] **1a - Auth**: email/password sign up, log in, log out; `/dashboard`
+  - [x] **1a - Auth**: email/password sign up, log in, log out; `/dashboard`
     is only reachable when signed in
   - [ ] **1b-i - Static world map**: countries render with distinct,
     purely-decorative colors, no interactivity yet
