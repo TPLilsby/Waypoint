@@ -98,4 +98,6 @@ docs/
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - data model, auth flow, and
   the "why" behind the technical choices
+- [docs/DESIGN.md](docs/DESIGN.md) - visual direction, color/type choices,
+  and the checklist for avoiding a templated, AI-generated look
 - [docs/ROADMAP.md](docs/ROADMAP.md) - phased build plan, in progress
