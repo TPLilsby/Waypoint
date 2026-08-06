@@ -94,8 +94,9 @@ matching can't accidentally also break session refresh for the whole app.
 
 ## Map rendering
 
-`react-simple-maps` (D3 + SVG) with open TopoJSON boundary data
-(`world-atlas`, `us-atlas`), rather than a hosted tile provider (Mapbox,
+`d3-geo` and `topojson-client` directly, with a small hand-written React
+component (`src/components/WorldMap.tsx`) rather than a wrapper library
+like `react-simple-maps`, and rather than a hosted tile provider (Mapbox,
 Google Maps) or a WebGL 3D globe. Reasoning:
 
 - No API key or usage-based billing to manage for something that's
@@ -107,10 +108,18 @@ Google Maps) or a WebGL 3D globe. Reasoning:
   `<path>` elements - no separate rendering pipeline to keep in sync
 - Keeps the entire stack inside free, unmetered tiers (see below)
 
+`react-simple-maps` was tried first, but its latest release (including the
+4.0 beta) still declares a peer dependency on React 16-18, not React 19.
+Rather than force-install a mismatched peer dependency, we went straight
+to `d3-geo` - which is what `react-simple-maps` wraps internally anyway,
+has no React dependency at all, and gives direct control over the
+projection object, which the zoom-to-globe stretch goal (below) needs
+regardless.
+
 A 3D WebGL globe (e.g. `react-globe.gl`) was considered and rejected for
 now: it looks great rotating, but it doesn't naturally "flatten" into a
 readable flat map when you zoom in - that would mean running two separate
-renderers and syncing state between them. `react-simple-maps` lets us get
+renderers and syncing state between them. A `d3-geo` projection lets us get
 a globe-like zoomed-out view with a plain 2D technique instead (see below),
 which is a smaller, single-renderer problem.
 
@@ -141,7 +150,15 @@ known D3 technique: interpolate the map's projection between a flat
 projection (e.g. `geoEqualEarth`) and `geoOrthographic` (a true globe
 projection, still rendered as flat SVG/Canvas - no WebGL) based on zoom
 level. This is more involved than the base map, so it's staged as its own
-step (1b-iv) rather than a blocker for getting the map on screen at all.
+step (1b-v) rather than a blocker for getting the map on screen at all.
+
+A first, simpler use of `geoOrthographic` already exists:
+`src/components/SpinningGlobe.tsx` renders the same country data through
+that projection with a slow constant rotation, used as decoration on the
+login/signup pages. It doesn't do the flat-to-globe interpolation itself,
+but it's a working proof that the projection, coloring, and rendering
+approach all work together before the harder zoom-driven version is
+attempted.
 
 ## Third-party data sources
 

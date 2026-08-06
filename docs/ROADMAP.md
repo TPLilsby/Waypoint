@@ -11,8 +11,12 @@ wired for long.
   something is visibly working after each one - see below.
   - [x] **1a - Auth**: email/password sign up, log in, log out; `/dashboard`
     is only reachable when signed in
-  - [ ] **1b-i - Static world map**: countries render with distinct,
-    purely-decorative colors, no interactivity yet
+  - [x] **1b-i - Static world map**: countries render with distinct,
+    purely-decorative colors, no interactivity yet. Also produced a
+    reusable `src/lib/worldTopology.ts` and a `SpinningGlobe` component
+    (same data, `geoOrthographic` projection) used as decoration on the
+    login/signup pages - see
+    [docs/ARCHITECTURE.md](ARCHITECTURE.md#zoom-to-globe-stretch-goal-for-phase-1b)
   - [ ] **1b-ii - Interactivity**: click cycles a country through
     default -> visited -> want-to-visit -> default (in-memory only, not
     saved yet); hover triggers the "pop" scale effect; visited shows a
@@ -31,7 +35,10 @@ wired for long.
   World Heritage Sites as additional togglable layers
 - [ ] **Phase 4 - Real statistics**: distance from home, population/area
   coverage (REST Countries), language/currency exposure, historical weather
-  on visit dates (Open-Meteo)
+  on visit dates (Open-Meteo). This is also when the dashboard should move
+  from a full-width map (as built in 1b-i) to the asymmetric 2:1 map/sidebar
+  layout from [docs/DESIGN.md](DESIGN.md#layout-and-composition) - deferred
+  until there's real sidebar content instead of an empty placeholder column
 - [ ] **Phase 5 - Public profiles**: `/u/[slug]` read-only shareable view,
   overlap comparison between two users' visited places
 - [ ] **Phase 6 - Achievements**: milestone badges and records (e.g.

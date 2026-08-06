@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import Link from 'next/link'
 import { login, type AuthActionState } from './actions'
+import { SpinningGlobe } from '@/components/SpinningGlobe'
 
 const initialState: AuthActionState = { error: null }
 
@@ -10,8 +11,8 @@ export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState)
 
   return (
-    <div className="flex flex-1 bg-bg">
-      <div className="flex w-full max-w-md flex-col gap-6 px-8 py-24 md:px-16">
+    <div className="flex flex-1 items-center bg-bg">
+      <div className="flex w-full max-w-md flex-col gap-6 px-8 md:px-24">
         <div className="flex flex-col gap-2">
           <h1 className="font-heading text-3xl text-ink">Log in</h1>
           <p className="text-sm text-muted">
@@ -61,6 +62,12 @@ export default function LoginPage() {
             {pending ? 'Logging in...' : 'Log in'}
           </button>
         </form>
+      </div>
+
+      <div className="hidden flex-1 items-center justify-center md:flex">
+        <div className="w-full max-w-md">
+          <SpinningGlobe />
+        </div>
       </div>
     </div>
   )
