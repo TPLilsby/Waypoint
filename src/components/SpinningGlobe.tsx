@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { geoOrthographic, geoPath } from "d3-geo";
-import { countryFeatures, getFeatureKey } from "@/lib/worldTopology";
-import { colorForCountry } from "@/lib/mapColors";
+import { countryFeatures } from "@/lib/worldTopology";
+import { getFeatureKey } from "@/lib/geoFeatures";
+import { colorForPlace } from "@/lib/mapColors";
 
 const SIZE = 480;
 const DEGREES_PER_TICK = 0.2;
@@ -49,7 +50,7 @@ export function SpinningGlobe() {
           <path
             key={`${colorKey}-${index}`}
             d={d}
-            fill={colorForCountry(colorKey)}
+            fill={colorForPlace(colorKey)}
             stroke="var(--bg)"
             strokeWidth={0.3}
           />

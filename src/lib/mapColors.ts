@@ -1,8 +1,9 @@
 /**
- * Decorative, per-country fill colors - see docs/DESIGN.md. These carry no
- * meaning (unlike the accent colors, which are reserved for status), so a
- * fixed muted palette assigned by a deterministic hash is enough: the same
- * country always gets the same color, without a hand-maintained mapping.
+ * Decorative, per-place fill colors - see docs/DESIGN.md. Used for
+ * countries, US states, and any future map layer. These carry no meaning
+ * (unlike the accent colors, which are reserved for status), so a fixed
+ * muted palette assigned by a deterministic hash is enough: the same
+ * place always gets the same color, without a hand-maintained mapping.
  *
  * Deliberately avoids the accent hues (terracotta, slate) so the visited/
  * want-to-visit indicators still stand out once they're layered on top.
@@ -33,6 +34,6 @@ function hashString(value: string): number {
   return Math.abs(hash);
 }
 
-export function colorForCountry(countryId: string): string {
-  return PALETTE[hashString(countryId) % PALETTE.length];
+export function colorForPlace(key: string): string {
+  return PALETTE[hashString(key) % PALETTE.length];
 }

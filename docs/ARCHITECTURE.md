@@ -180,6 +180,38 @@ country. That's a deliberate simplification for a personal-scale app, not
 an oversight; worth revisiting if Waypoint ever needs to handle flaky
 connections gracefully (e.g. a proper offline queue).
 
+### One PlaceMap, two thin wrappers
+
+`WorldMap` and `USMap` are both just a fitted projection and a
+`FeatureCollection` handed to a shared `src/components/PlaceMap.tsx`,
+which owns the actual click-to-cycle, hover, checkmark, and Supabase
+read/write logic. Countries and US states need the *same* interaction
+behavior with *different* data and projections - splitting those two
+concerns keeps the interactive logic in one place instead of forked
+across two near-identical components.
+
+US states use `geoAlbersUsa()` - the standard projection for a compact
+continental-US view with Alaska and Hawaii repositioned as insets -
+applied to `us-atlas`'s plain `states-10m.json` (real lon/lat), not its
+pre-baked `states-albers-10m.json`. The pre-baked file has already moved
+Alaska/Hawaii to their inset positions, which would make `geoCentroid()`
+(used to compute the `lat`/`lng` stored in `places`) return meaningless
+coordinates instead of each state's real geographic centroid.
+
+### Tabs, not stacked or side-by-side
+
+The dashboard shows the world map and US state map behind a World/United
+States tab switch (`src/components/DashboardMaps.tsx`). Both maps stay
+mounted at all times - the inactive one is hidden with a CSS class, not
+removed from the tree. `PlaceMap` keeps each map's saved statuses in
+local component state, seeded once from the `initialStatuses` prop; if
+switching tabs unmounted the inactive map, it would remount later with
+that same stale prop and appear to have "lost" any change made before the
+switch, even though the write had already succeeded in Supabase. Keeping
+both mounted avoids that mismatch entirely, at the cost of rendering both
+maps' SVG paths even when one is hidden - a fine trade at this scale
+(a few hundred paths per map).
+
 ### Zoom-to-globe (stretch goal for phase 1b)
 
 The "flattens out zoomed in, looks like a globe zoomed out" effect is a

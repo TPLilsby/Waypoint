@@ -23,7 +23,15 @@ wired for long.
     pulses the shape's own stroke
   - [x] **1b-iii - Persistence**: clicking a country writes/updates a
     `places` row in Supabase; the map loads existing status on page load
-  - [ ] **1b-iv - US state map**: repeat 1b-i through 1b-iii for US states
+  - [x] **1b-iv - US state map**: repeat 1b-i through 1b-iii for US states.
+    Interaction/persistence logic was extracted into a shared `PlaceMap`
+    component so `WorldMap` and `USMap` are thin wrappers around the same
+    behavior - see
+    [docs/ARCHITECTURE.md](ARCHITECTURE.md#one-placemap-two-thin-wrappers).
+    The dashboard shows both maps behind a World/United States tab switch
+    rather than stacked or side-by-side, per a UX call - both maps stay
+    mounted while hidden so switching tabs doesn't lose either one's
+    in-memory status
   - [ ] **1b-v - Zoom-to-globe (stretch)**: interpolate between a flat and
     an orthographic D3 projection based on zoom level - see
     [docs/ARCHITECTURE.md](ARCHITECTURE.md#zoom-to-globe-stretch-goal-for-phase-1b).
