@@ -32,11 +32,20 @@ wired for long.
     rather than stacked or side-by-side, per a UX call - both maps stay
     mounted while hidden so switching tabs doesn't lose either one's
     in-memory status
-  - [ ] **1b-v - Zoom-to-globe (stretch)**: interpolate between a flat and
-    an orthographic D3 projection based on zoom level - see
-    [docs/ARCHITECTURE.md](ARCHITECTURE.md#zoom-to-globe-stretch-goal-for-phase-1b).
-    Cut from phase 1 without blocking it if it turns out to need more time
-    than expected
+  - [x] **1b-v - Globe view (scoped down from the original stretch
+    goal)**: a "View as globe" toggle crossfades between the flat world
+    map and a `geoOrthographic` globe, draggable to rotate (pointer
+    events, with a drag-vs-click threshold so rotating doesn't trigger a
+    country's status toggle). Both views share one live status map via
+    `usePlaceStatuses`
+  - [ ] **Future - continuous zoom-to-globe morph**: the original idea -
+    interpolating the projection itself based on zoom level, so the map
+    flattens/curves continuously instead of a discrete toggle - see
+    [docs/ARCHITECTURE.md](ARCHITECTURE.md#zoom-to-globe-stretch-goal-for-phase-1b)
+    for why it was scoped down (point-level projection interpolation plus
+    orthographic's hemisphere clipping is a meaningfully harder problem).
+    Revisit only if there's a specific reason to invest in it - the
+    toggle already delivers the promised feel
 - [ ] **Phase 2 - Trips and timeline**: group places into trips with dates,
   chronological timeline / calendar-heatmap of travel days
 - [ ] **Phase 3 - Extra map layers**: national parks (NPS API) and UNESCO

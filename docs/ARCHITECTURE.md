@@ -214,20 +214,32 @@ maps' SVG paths even when one is hidden - a fine trade at this scale
 
 ### Zoom-to-globe (stretch goal for phase 1b)
 
-The "flattens out zoomed in, looks like a globe zoomed out" effect is a
-known D3 technique: interpolate the map's projection between a flat
-projection (e.g. `geoEqualEarth`) and `geoOrthographic` (a true globe
-projection, still rendered as flat SVG/Canvas - no WebGL) based on zoom
-level. This is more involved than the base map, so it's staged as its own
-step (1b-v) rather than a blocker for getting the map on screen at all.
+The original idea - continuously flattening into a globe as you zoom out
+- is a known D3 technique: interpolate the map's projection between a
+flat projection and `geoOrthographic` at the point level, based on zoom.
+It was scoped down for 1b-v: `geoOrthographic` clips away the far
+hemisphere, so a naive linear interpolation between two projections'
+point outputs can produce visible artifacts right at the clipping
+boundary rather than a clean continuous morph. That's a meaningfully
+harder problem than the rest of the map work, so it's left as a
+possible future improvement rather than blocking phase 1 - see
+[docs/ROADMAP.md](ROADMAP.md) for the current status.
 
-A first, simpler use of `geoOrthographic` already exists:
+What shipped instead: a "View as globe" toggle
+(`src/components/WorldMap.tsx`) that crossfades between the flat map and
+a draggable `geoOrthographic` globe - both rendered by the same
+`PlaceMap`, sharing one `usePlaceStatuses` state, so neither view ever
+shows stale data. Dragging rotates the globe by updating its `rotate()`
+parameters directly from pointer movement; since a click and a drag both
+start with the same pointer-down event on a country shape, the component
+tracks whether the pointer moved past a small threshold and, if so,
+suppresses that gesture's status toggle - otherwise every rotate would
+also flip the country you started dragging from.
+
+A second, simpler use of `geoOrthographic` already exists:
 `src/components/SpinningGlobe.tsx` renders the same country data through
-that projection with a slow constant rotation, used as decoration on the
-login/signup pages. It doesn't do the flat-to-globe interpolation itself,
-but it's a working proof that the projection, coloring, and rendering
-approach all work together before the harder zoom-driven version is
-attempted.
+that projection with a slow constant auto-rotation (no drag, no click
+handling), used as decoration on the login/signup pages.
 
 ## Third-party data sources
 
