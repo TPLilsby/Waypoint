@@ -6,7 +6,7 @@ wired for long.
 
 - [x] **Phase 0 - Scaffold**: Next.js + Supabase project setup, initial
   schema (`profiles`, `trips`, `places`) with RLS, documentation
-- [ ] **Phase 1 - Foundation**: auth, world map and US state map with
+- [x] **Phase 1 - Foundation**: auth, world map and US state map with
   click-to-toggle status, private dashboard view. Broken into small steps so
   something is visibly working after each one - see below.
   - [x] **1a - Auth**: email/password sign up, log in, log out; `/dashboard`
@@ -48,6 +48,16 @@ wired for long.
     toggle already delivers the promised feel
 - [ ] **Phase 2 - Trips and timeline**: group places into trips with dates,
   chronological timeline / calendar-heatmap of travel days
+  - [x] **2a - Trip CRUD**: `/dashboard/trips` page - create/edit/delete
+    trips (title, start/end date, note) via Server Actions, separate from
+    the map entirely
+  - [ ] **2b - Assign places to a trip**: an "active trip" selector above
+    the map; marking a place visited while a trip is active sets that
+    place's `trip_id`
+  - [ ] **2c - Chronological trip list**: trips shown in date order with
+    a count of places in each
+  - [ ] **2d - Calendar heatmap**: a GitHub-contributions-style view of
+    travel days, built after 2c once there's real trip data to visualize
 - [ ] **Phase 3 - Extra map layers**: national parks (NPS API) and UNESCO
   World Heritage Sites as additional togglable layers
 - [ ] **Phase 4 - Real statistics**: distance from home, population/area
