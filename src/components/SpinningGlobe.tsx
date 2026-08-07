@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { geoOrthographic, geoPath } from "d3-geo";
-import { countryFeatures } from "@/lib/worldTopology";
+import { countryFeatures, getFeatureKey } from "@/lib/worldTopology";
 import { colorForCountry } from "@/lib/mapColors";
 
 const SIZE = 480;
@@ -44,8 +44,7 @@ export function SpinningGlobe() {
       {countryFeatures.features.map((country, index) => {
         const d = pathGenerator(country);
         if (!d) return null;
-        // See WorldMap.tsx - a few territories have no numeric id here.
-        const colorKey = country.id !== undefined ? String(country.id) : String(country.properties?.name);
+        const colorKey = getFeatureKey(country);
         return (
           <path
             key={`${colorKey}-${index}`}

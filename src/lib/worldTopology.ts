@@ -1,6 +1,6 @@
 import { feature } from "topojson-client";
 import type { Topology, GeometryCollection } from "topojson-specification";
-import type { FeatureCollection, Geometry } from "geojson";
+import type { Feature, FeatureCollection, Geometry } from "geojson";
 import worldTopology from "world-atlas/countries-110m.json";
 
 /**
@@ -15,3 +15,14 @@ export const countryFeatures = feature(
   topology,
   countriesObject
 ) as FeatureCollection<Geometry>;
+
+/**
+ * A handful of disputed/unrecognized territories (e.g. Kosovo, Somaliland)
+ * have no numeric id in this dataset - fall back to the name so they still
+ * get a stable key for coloring, React lists, and status tracking.
+ */
+export function getFeatureKey(feature: Feature<Geometry>): string {
+  return feature.id !== undefined
+    ? String(feature.id)
+    : String(feature.properties?.name);
+}

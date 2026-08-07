@@ -32,3 +32,36 @@ body {
   background: var(--bg);
   color: var(--ink);
 }
+
+/*
+ * Map country interactivity (docs/ARCHITECTURE.md#base-coloring-and-status-indicators).
+ * transform-box: fill-box makes the hover "pop" scale around the shape's
+ * own center instead of the SVG's top-left corner - without it every
+ * country would balloon out from the same corner regardless of position.
+ */
+.country-shape {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.country-shape:hover {
+  transform: scale(1.15);
+}
+
+.country-shape.want-to-visit path:first-child {
+  stroke: var(--accent-2);
+  stroke-width: 1.5px;
+  animation: pulse-stroke 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse-stroke {
+  0%,
+  100% {
+    stroke-opacity: 0.4;
+  }
+  50% {
+    stroke-opacity: 1;
+  }
+}

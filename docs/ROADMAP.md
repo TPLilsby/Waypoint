@@ -17,7 +17,7 @@ wired for long.
     (same data, `geoOrthographic` projection) used as decoration on the
     login/signup pages - see
     [docs/ARCHITECTURE.md](ARCHITECTURE.md#zoom-to-globe-stretch-goal-for-phase-1b)
-  - [ ] **1b-ii - Interactivity**: click cycles a country through
+  - [x] **1b-ii - Interactivity**: click cycles a country through
     default -> visited -> want-to-visit -> default (in-memory only, not
     saved yet); hover triggers the "pop" scale effect; visited shows a
     checkmark icon, want-to-visit pulses the shape's own stroke
