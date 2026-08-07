@@ -36,6 +36,7 @@ export type Database = {
           is_public?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       trips: {
         Row: {
@@ -65,6 +66,7 @@ export type Database = {
           note?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       places: {
         Row: {
@@ -112,8 +114,11 @@ export type Database = {
           photo_url?: string | null
           created_at?: string
         }
+        Relationships: []
       }
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
     Enums: {
       place_type: PlaceType
       place_status: PlaceStatus

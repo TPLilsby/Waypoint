@@ -1,9 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { geoEqualEarth, geoPath } from "d3-geo";
+import { geoCentroid, geoEqualEarth, geoPath } from "d3-geo";
+import type { Feature, Geometry } from "geojson";
 import { countryFeatures, getFeatureKey } from "@/lib/worldTopology";
 import { colorForCountry } from "@/lib/mapColors";
+import { createClient } from "@/lib/supabase/client";
+import type { PlaceStatus } from "@/types/database";
 
 const VIEWBOX_WIDTH = 800;
 const VIEWBOX_HEIGHT = 450;
@@ -13,18 +16,21 @@ const VIEWBOX_HEIGHT = 450;
 // case (see docs/ARCHITECTURE.md#base-coloring-and-status-indicators).
 const CHECKMARK_PATH = "M -4 0 L -1.3 3 L 4.5 -4.5";
 
-type PlaceStatus = "visited" | "want_to_visit";
-
-// In-memory only for now - cycling default -> visited -> want-to-visit ->
-// default. Persisting this to Supabase is 1b-iii, not this step.
+// Cycles default -> visited -> want-to-visit -> default on each click.
 function nextStatus(current: PlaceStatus | undefined): PlaceStatus | undefined {
   if (current === undefined) return "visited";
   if (current === "visited") return "want_to_visit";
   return undefined;
 }
 
-export function WorldMap() {
-  const [statuses, setStatuses] = useState<Record<string, PlaceStatus>>({});
+interface WorldMapProps {
+  userId: string;
+  initialStatuses: Record<string, PlaceStatus>;
+}
+
+export function WorldMap({ userId, initialStatuses }: WorldMapProps) {
+  const [statuses, setStatuses] = useState(initialStatuses);
+  const supabase = useMemo(() => createClient(), []);
 
   const pathGenerator = useMemo(() => {
     const projection = geoEqualEarth().fitSize(
@@ -34,10 +40,15 @@ export function WorldMap() {
     return geoPath(projection);
   }, []);
 
-  function toggleStatus(key: string) {
+  async function toggleStatus(country: Feature<Geometry>) {
+    const key = getFeatureKey(country);
+    const next = nextStatus(statuses[key]);
+
+    // Update the UI immediately; the Supabase write happens in the
+    // background. See docs/ARCHITECTURE.md for why this doesn't retry on
+    // failure yet - a deliberate simplification, not an oversight.
     setStatuses((prev) => {
       const updated = { ...prev };
-      const next = nextStatus(prev[key]);
       if (next === undefined) {
         delete updated[key];
       } else {
@@ -45,6 +56,32 @@ export function WorldMap() {
       }
       return updated;
     });
+
+    if (next === undefined) {
+      const { error } = await supabase
+        .from("places")
+        .delete()
+        .eq("user_id", userId)
+        .eq("type", "country")
+        .eq("ref_code", key);
+      if (error) console.error("Failed to remove place:", error.message);
+      return;
+    }
+
+    const [lng, lat] = geoCentroid(country);
+    const { error } = await supabase.from("places").upsert(
+      {
+        user_id: userId,
+        type: "country",
+        ref_code: key,
+        name: String(country.properties?.name ?? key),
+        lat,
+        lng,
+        status: next,
+      },
+      { onConflict: "user_id,type,ref_code" }
+    );
+    if (error) console.error("Failed to save place:", error.message);
   }
 
   return (
@@ -68,7 +105,7 @@ export function WorldMap() {
           <g
             key={`${key}-${index}`}
             className={`country-shape${status === "want_to_visit" ? " want-to-visit" : ""}`}
-            onClick={() => toggleStatus(key)}
+            onClick={() => toggleStatus(country)}
           >
             <path
               d={d}

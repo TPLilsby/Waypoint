@@ -59,7 +59,8 @@ create table public.places (
   user_id uuid not null references auth.users (id) on delete cascade,
   trip_id uuid references public.trips (id) on delete set null,
   type public.place_type not null,
-  -- ISO-3166 alpha-2 for countries, FIPS/postal code for US states,
+  -- Numeric ISO-3166-1 for countries (matches the world-atlas topology's
+  -- own `id`, no lookup table needed), FIPS/postal code for US states,
   -- source dataset id for national parks and UNESCO sites.
   ref_code text not null,
   name text not null,

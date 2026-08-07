@@ -18,10 +18,10 @@ wired for long.
     login/signup pages - see
     [docs/ARCHITECTURE.md](ARCHITECTURE.md#zoom-to-globe-stretch-goal-for-phase-1b)
   - [x] **1b-ii - Interactivity**: click cycles a country through
-    default -> visited -> want-to-visit -> default (in-memory only, not
-    saved yet); hover triggers the "pop" scale effect; visited shows a
-    checkmark icon, want-to-visit pulses the shape's own stroke
-  - [ ] **1b-iii - Persistence**: clicking a country writes/updates a
+    default -> visited -> want-to-visit -> default; hover triggers the
+    "pop" scale effect; visited shows a checkmark icon, want-to-visit
+    pulses the shape's own stroke
+  - [x] **1b-iii - Persistence**: clicking a country writes/updates a
     `places` row in Supabase; the map loads existing status on page load
   - [ ] **1b-iv - US state map**: repeat 1b-i through 1b-iii for US states
   - [ ] **1b-v - Zoom-to-globe (stretch)**: interpolate between a flat and

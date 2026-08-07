@@ -143,6 +143,43 @@ imperceptible at world-map zoom. A minimum stroke width, or a subtle
 deferred until we're actually looking at the rendered map, not decided
 up front.
 
+### Persisting map interactions
+
+Clicking a country writes straight to Supabase from the browser client
+(`src/lib/supabase/client.ts`), not through a Server Action like the auth
+flows do. Row Level Security already enforces `auth.uid() = user_id`
+regardless of which client makes the call, so routing writes through the
+Next.js server first wouldn't add any security - it would only add a
+network hop, which matters here because a country click needs to feel
+instant even if you click several in quick succession.
+
+The write is a `upsert` keyed on `(user_id, type, ref_code)`, added as a
+unique constraint in
+[`20260807172719_places_unique_ref_code.sql`](../supabase/migrations/20260807172719_places_unique_ref_code.sql).
+Without it, clicking the same country through visited -> want-to-visit
+could insert a second row instead of updating the first one. Cycling back
+to no status deletes the row rather than storing an empty/null state -
+"no row" already means "no status," so there's nothing to distinguish.
+
+`ref_code` for countries is the numeric ISO-3166-1 id straight from the
+`world-atlas` topology's own `id` field (e.g. `"242"` for Fiji) - not the
+alpha-2 code you'd see in most APIs. No lookup table needed, since it's
+already what the map data provides; REST Countries (phase 4) supports
+numeric-code lookups just as well as alpha-2.
+
+The map's initial state is fetched server-side in
+`src/app/dashboard/page.tsx` (already a Server Component) and passed to
+`WorldMap` as a prop, rather than fetched client-side in a `useEffect`
+after mount. That avoids a flash where the map briefly renders with no
+saved statuses before a follow-up request fills them in.
+
+The write itself has no retry queue - if it fails (a dropped connection,
+for instance), the local UI has already updated but the database hasn't,
+and the mismatch isn't reconciled until the next successful write to that
+country. That's a deliberate simplification for a personal-scale app, not
+an oversight; worth revisiting if Waypoint ever needs to handle flaky
+connections gracefully (e.g. a proper offline queue).
+
 ### Zoom-to-globe (stretch goal for phase 1b)
 
 The "flattens out zoomed in, looks like a globe zoomed out" effect is a
