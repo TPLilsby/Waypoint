@@ -8,7 +8,7 @@ type Trip = Database["public"]["Tables"]["trips"]["Row"];
 
 const initialState: TripActionState = { error: null, success: false };
 
-export function TripRow({ trip }: { trip: Trip }) {
+export function TripRow({ trip, placeCount }: { trip: Trip; placeCount: number }) {
   const [editing, setEditing] = useState(false);
   const [state, formAction, pending] = useActionState(updateTrip, initialState);
 
@@ -84,6 +84,13 @@ export function TripRow({ trip }: { trip: Trip }) {
             {trip.start_date ?? "?"} - {trip.end_date ?? "?"}
           </p>
         )}
+        <p className="text-sm text-muted">
+          {placeCount === 0
+            ? "No places yet"
+            : placeCount === 1
+              ? "1 place"
+              : `${placeCount} places`}
+        </p>
         {trip.note && <p className="mt-1 text-sm text-muted">{trip.note}</p>}
       </div>
       <div className="flex shrink-0 gap-3">

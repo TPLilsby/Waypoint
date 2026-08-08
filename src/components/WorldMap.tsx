@@ -19,6 +19,7 @@ const MAX_LATITUDE = 80;
 interface WorldMapProps {
   userId: string;
   initialStatuses: Record<string, PlaceStatus>;
+  activeTripId: string | null;
 }
 
 /**
@@ -28,11 +29,12 @@ interface WorldMapProps {
  * countryFeatures through usePlaceStatuses's shared state, so toggling
  * never shows stale data in either view.
  */
-export function WorldMap({ userId, initialStatuses }: WorldMapProps) {
+export function WorldMap({ userId, initialStatuses, activeTripId }: WorldMapProps) {
   const { statuses, toggleStatus } = usePlaceStatuses(
     "country",
     userId,
-    initialStatuses
+    initialStatuses,
+    activeTripId
   );
   const [view, setView] = useState<"flat" | "globe">("flat");
   const [rotation, setRotation] = useState<[number, number]>(DEFAULT_ROTATION);

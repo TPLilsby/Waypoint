@@ -51,11 +51,13 @@ wired for long.
   - [x] **2a - Trip CRUD**: `/dashboard/trips` page - create/edit/delete
     trips (title, start/end date, note) via Server Actions, separate from
     the map entirely
-  - [ ] **2b - Assign places to a trip**: an "active trip" selector above
-    the map; marking a place visited while a trip is active sets that
-    place's `trip_id`
-  - [ ] **2c - Chronological trip list**: trips shown in date order with
-    a count of places in each
+  - [x] **2b - Assign places to a trip**: a "Marking places for" trip
+    selector above the map; marking a place visited while a trip is
+    active sets that place's `trip_id` (cleared again if it cycles past
+    visited to want-to-visit, since that's no longer an actual visit)
+  - [x] **2c - Chronological trip list**: trips shown oldest-first with a
+    count of places in each, which doubles as a correctness check on 2b -
+    the count is only right if trip assignment actually worked
   - [ ] **2d - Calendar heatmap**: a GitHub-contributions-style view of
     travel days, built after 2c once there's real trip data to visualize
 - [ ] **Phase 3 - Extra map layers**: national parks (NPS API) and UNESCO

@@ -24,7 +24,8 @@ function nextStatus(current: PlaceStatus | undefined): PlaceStatus | undefined {
 export function usePlaceStatuses(
   placeType: PlaceType,
   userId: string,
-  initialStatuses: Record<string, PlaceStatus>
+  initialStatuses: Record<string, PlaceStatus>,
+  activeTripId: string | null = null
 ) {
   const [statuses, setStatuses] = useState(initialStatuses);
   const supabase = useMemo(() => createClient(), []);
@@ -64,6 +65,10 @@ export function usePlaceStatuses(
         lat,
         lng,
         status: next,
+        // Only "visited" represents an actual visit that can belong to a
+        // trip - cycling to "want_to_visit" clears any prior trip link
+        // rather than leaving a stale association behind.
+        trip_id: next === "visited" ? activeTripId : null,
       },
       { onConflict: "user_id,type,ref_code" }
     );

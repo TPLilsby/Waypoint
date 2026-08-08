@@ -34,11 +34,22 @@ export default async function DashboardPage() {
     statusesByType[place.type][place.ref_code] = place.status;
   }
 
+  const { data: trips, error: tripsError } = await supabase
+    .from("trips")
+    .select("id, title")
+    .eq("user_id", user.id)
+    .order("start_date", { ascending: false, nullsFirst: false });
+
+  if (tripsError) {
+    console.error("Failed to load trips:", tripsError.message);
+  }
+
   return (
     <DashboardMaps
       userId={user.id}
       countryStatuses={statusesByType.country}
       stateStatuses={statusesByType.us_state}
+      trips={trips ?? []}
     />
   );
 }

@@ -12,13 +12,15 @@ const VIEWBOX: readonly [number, number] = [800, 500];
 interface USMapProps {
   userId: string;
   initialStatuses: Record<string, PlaceStatus>;
+  activeTripId: string | null;
 }
 
-export function USMap({ userId, initialStatuses }: USMapProps) {
+export function USMap({ userId, initialStatuses, activeTripId }: USMapProps) {
   const { statuses, toggleStatus } = usePlaceStatuses(
     "us_state",
     userId,
-    initialStatuses
+    initialStatuses,
+    activeTripId
   );
 
   const projection = useMemo(
