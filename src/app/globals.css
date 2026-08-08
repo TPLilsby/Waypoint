@@ -34,23 +34,30 @@ body {
 }
 
 /*
- * Map country interactivity (docs/ARCHITECTURE.md#base-coloring-and-status-indicators).
- * transform-box: fill-box makes the hover "pop" scale around the shape's
- * own center instead of the SVG's top-left corner - without it every
- * country would balloon out from the same corner regardless of position.
+ * Map place interactivity (docs/ARCHITECTURE.md#base-coloring-and-status-indicators).
+ * Applies to both polygon shapes (countries, states) and point markers
+ * (national parks, UNESCO sites). transform-box: fill-box makes the hover
+ * "pop" scale around the shape's own center instead of the SVG's
+ * top-left corner - without it everything would balloon out from the
+ * same corner regardless of position.
  */
-.country-shape {
+.place-shape {
   cursor: pointer;
+  /* Re-enables clicks on individual shapes even when an ancestor overlay
+     SVG (e.g. a national-parks layer on top of the US map) sets
+     pointer-events: none on itself so empty overlay space doesn't block
+     clicks to whatever's underneath. */
+  pointer-events: auto;
   transform-box: fill-box;
   transform-origin: center;
   transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.country-shape:hover {
+.place-shape:hover {
   transform: scale(1.15);
 }
 
-.country-shape.want-to-visit path:first-child {
+.place-shape.want-to-visit path:first-child {
   stroke: var(--accent-2);
   stroke-width: 1.5px;
   animation: pulse-stroke 1.6s ease-in-out infinite;

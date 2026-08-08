@@ -253,13 +253,56 @@ A second, simpler use of `geoOrthographic` already exists:
 that projection with a slow constant auto-rotation (no drag, no click
 handling), used as decoration on the login/signup pages.
 
+### National parks and UNESCO sites are point layers, not new maps
+
+Countries and US states are polygons rendered with `geoPath(place)`.
+National parks and UNESCO sites are points - a single lat/lng each, not a
+boundary - so they're rendered by the same `PlaceMap` with
+`pathGenerator.pointRadius(n)` set, which makes `geoPath` draw
+Point/MultiPoint geometries as circles instead of doing nothing with
+them. This meant no new rendering component was needed, just an optional
+`pointRadius` prop.
+
+Both layers are **overlays** on the existing maps (national parks on
+`USMap`, UNESCO sites on `WorldMap`), not separate map views: a second
+`PlaceMap` instance shares the same fitted `projection` as the base map
+underneath it, so a park's or site's marker lands in the correct spot
+relative to the state/country polygons. The overlay's own `<svg>`
+wrapper has `pointer-events: none` so its mostly-empty canvas doesn't
+block clicks on the base map underneath; the `.place-shape` class each
+individual marker uses re-enables `pointer-events: auto` on itself,
+so markers stay clickable while empty space doesn't intercept anything
+(see `globals.css`). On `WorldMap`'s globe view, the UNESCO overlay sits
+inside the same draggable container as the globe itself, so the existing
+drag-vs-click threshold also protects it from being toggled by a rotate
+gesture.
+
+The two layers use deliberately different data strategies:
+
+- **National parks**: fetched live from the NPS API
+  (`src/lib/nationalParks.ts`), filtered to the `"National Park"`
+  designation (the API covers every park service unit - monuments,
+  historic sites, seashores, ... - not just the ~63 parks this layer
+  means to show). Cached for a day via Next's `fetch` `revalidate`
+  option, since park data essentially never changes and there's no
+  reason to hit the API on every request.
+- **UNESCO sites**: no free live API exists for this. The original plan
+  was a small hand-curated list, but Wikidata tracks "World Heritage
+  Site" as a structured property (`P1435` = `Q9259`) with coordinates,
+  queryable via SPARQL - so `src/data/unescoSites.json` was generated
+  once from that query instead of typed in by hand, giving the full
+  ~1,247-site list with real coordinates rather than a smaller
+  approximated one. It's committed as static data
+  (`src/lib/unescoTopology.ts` loads it directly), not re-fetched, since
+  World Heritage listings change a few times a year at most.
+
 ## Third-party data sources
 
 | Source | Used for | Why this one |
 |---|---|---|
 | REST Countries | Population, area, languages, currencies | Free, no key, no rate limit concerns for this scale |
 | NPS API | The 63 US national parks | Official, free, real API integration (not static data) |
-| UNESCO World Heritage List | Site names, locations | Changes rarely - imported once as static seed data instead of hit on every request |
+| Wikidata (SPARQL) | UNESCO World Heritage Site names and coordinates | Free, no key, structured and queryable - see below for why this replaced the originally planned hand-curated list |
 | Open-Meteo | Historical weather for visit dates | Free, no key, has historical data going back decades |
 
 ## Hosting and free-tier notes

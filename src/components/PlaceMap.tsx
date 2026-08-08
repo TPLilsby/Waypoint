@@ -20,15 +20,19 @@ interface PlaceMapProps {
   onToggle: (place: Feature<Geometry>) => void;
   ariaLabel: string;
   className?: string;
+  // Set for point-feature layers (national parks, UNESCO sites) so they
+  // render as circles of this radius instead of polygon outlines. d3-geo
+  // only draws Point/MultiPoint geometries when a pointRadius is set.
+  pointRadius?: number;
 }
 
 /**
- * Renders any place-type map (countries, US states, ...) with the same
- * click-to-cycle and hover-pop behavior. A controlled component: status
- * state and Supabase persistence live in usePlaceStatuses, one level up,
- * so multiple projections of the same data (e.g. WorldMap's flat and
- * globe views) can share one live status map instead of each keeping an
- * independent copy.
+ * Renders any place-type map or overlay layer (countries, US states,
+ * national park/UNESCO point markers, ...) with the same click-to-cycle
+ * and hover-pop behavior. A controlled component: status state and
+ * Supabase persistence live in usePlaceStatuses, one level up, so
+ * multiple projections/layers of the same or different data can share
+ * live status instead of each keeping an independent copy.
  */
 export function PlaceMap({
   features,
@@ -38,8 +42,13 @@ export function PlaceMap({
   onToggle,
   ariaLabel,
   className,
+  pointRadius,
 }: PlaceMapProps) {
-  const pathGenerator = useMemo(() => geoPath(projection), [projection]);
+  const pathGenerator = useMemo(() => {
+    const generator = geoPath(projection);
+    if (pointRadius !== undefined) generator.pointRadius(pointRadius);
+    return generator;
+  }, [projection, pointRadius]);
 
   return (
     <svg
@@ -61,7 +70,7 @@ export function PlaceMap({
         return (
           <g
             key={`${key}-${index}`}
-            className={`country-shape${status === "want_to_visit" ? " want-to-visit" : ""}`}
+            className={`place-shape${status === "want_to_visit" ? " want-to-visit" : ""}`}
             onClick={() => onToggle(place)}
           >
             <path d={d} fill={colorForPlace(key)} stroke="var(--bg)" strokeWidth={0.5} />

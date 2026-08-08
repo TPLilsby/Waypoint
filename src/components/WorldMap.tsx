@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { geoEqualEarth, geoOrthographic } from "d3-geo";
 import type { Feature, Geometry } from "geojson";
 import { countryFeatures } from "@/lib/worldTopology";
+import { unescoFeatures } from "@/lib/unescoTopology";
 import { usePlaceStatuses } from "@/lib/usePlaceStatuses";
 import { PlaceMap } from "@/components/PlaceMap";
 import type { PlaceStatus } from "@/types/database";
@@ -15,11 +16,13 @@ const DEFAULT_ROTATION: [number, number] = [-10, -15];
 const DRAG_SENSITIVITY = 0.3;
 const DRAG_THRESHOLD_PX = 3;
 const MAX_LATITUDE = 80;
+const UNESCO_POINT_RADIUS = 2.5;
 
 interface WorldMapProps {
   userId: string;
   initialStatuses: Record<string, PlaceStatus>;
   activeTripId: string | null;
+  initialUnescoStatuses: Record<string, PlaceStatus>;
 }
 
 /**
@@ -27,21 +30,36 @@ interface WorldMapProps {
  * interpolation - see docs/ARCHITECTURE.md#zoom-to-globe-stretch-goal-for-phase-1b
  * for why the continuous version is deferred. Both views render the same
  * countryFeatures through usePlaceStatuses's shared state, so toggling
- * never shows stale data in either view.
+ * never shows stale data in either view. The UNESCO overlay follows the
+ * same pattern as the national parks layer on USMap.
  */
-export function WorldMap({ userId, initialStatuses, activeTripId }: WorldMapProps) {
+export function WorldMap({
+  userId,
+  initialStatuses,
+  activeTripId,
+  initialUnescoStatuses,
+}: WorldMapProps) {
   const { statuses, toggleStatus } = usePlaceStatuses(
     "country",
     userId,
     initialStatuses,
     activeTripId
   );
+  const { statuses: unescoStatuses, toggleStatus: toggleUnescoStatus } = usePlaceStatuses(
+    "unesco_site",
+    userId,
+    initialUnescoStatuses,
+    activeTripId
+  );
   const [view, setView] = useState<"flat" | "globe">("flat");
+  const [showUnesco, setShowUnesco] = useState(false);
   const [rotation, setRotation] = useState<[number, number]>(DEFAULT_ROTATION);
 
   // Distinguishes a drag (rotate) from a click (toggle status) on the
   // globe: pointer capture alone doesn't reliably suppress the click that
   // follows a drag, so we track it ourselves and consume the flag once.
+  // Covers both the country globe and the UNESCO overlay on top of it,
+  // since both sit inside the same draggable container.
   const dragStateRef = useRef<{
     startX: number;
     startY: number;
@@ -97,23 +115,34 @@ export function WorldMap({ userId, initialStatuses, activeTripId }: WorldMapProp
     dragStateRef.current = null;
   }
 
-  function handleGlobeToggle(place: Feature<Geometry>) {
-    if (wasDraggedRef.current) {
-      wasDraggedRef.current = false;
-      return;
-    }
-    toggleStatus(place);
+  function guardedOnGlobe<T extends Feature<Geometry>>(toggle: (place: T) => void) {
+    return (place: T) => {
+      if (wasDraggedRef.current) {
+        wasDraggedRef.current = false;
+        return;
+      }
+      toggle(place);
+    };
   }
 
   return (
     <div className="flex flex-1 flex-col gap-3">
-      <button
-        type="button"
-        onClick={() => setView((v) => (v === "flat" ? "globe" : "flat"))}
-        className="self-start rounded-md border border-line px-3 py-1.5 text-sm text-ink hover:border-accent"
-      >
-        {view === "flat" ? "View as globe" : "Back to flat map"}
-      </button>
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={() => setView((v) => (v === "flat" ? "globe" : "flat"))}
+          className="self-start rounded-md border border-line px-3 py-1.5 text-sm text-ink hover:border-accent"
+        >
+          {view === "flat" ? "View as globe" : "Back to flat map"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowUnesco((v) => !v)}
+          className="self-start rounded-md border border-line px-3 py-1.5 text-sm text-ink hover:border-accent"
+        >
+          {showUnesco ? "Hide UNESCO sites" : "Show UNESCO sites"}
+        </button>
+      </div>
 
       <div className="relative flex flex-1">
         <div
@@ -129,6 +158,18 @@ export function WorldMap({ userId, initialStatuses, activeTripId }: WorldMapProp
             onToggle={toggleStatus}
             ariaLabel="World map"
           />
+          {showUnesco && (
+            <PlaceMap
+              features={unescoFeatures}
+              projection={flatProjection}
+              viewBox={FLAT_VIEWBOX}
+              statuses={unescoStatuses}
+              onToggle={toggleUnescoStatus}
+              ariaLabel="UNESCO World Heritage Sites"
+              pointRadius={UNESCO_POINT_RADIUS}
+              className="pointer-events-none absolute inset-0 h-full w-full"
+            />
+          )}
         </div>
 
         <div
@@ -144,9 +185,21 @@ export function WorldMap({ userId, initialStatuses, activeTripId }: WorldMapProp
             projection={globeProjection}
             viewBox={GLOBE_VIEWBOX}
             statuses={statuses}
-            onToggle={handleGlobeToggle}
+            onToggle={guardedOnGlobe(toggleStatus)}
             ariaLabel="World globe"
           />
+          {showUnesco && (
+            <PlaceMap
+              features={unescoFeatures}
+              projection={globeProjection}
+              viewBox={GLOBE_VIEWBOX}
+              statuses={unescoStatuses}
+              onToggle={guardedOnGlobe(toggleUnescoStatus)}
+              ariaLabel="UNESCO World Heritage Sites (globe)"
+              pointRadius={UNESCO_POINT_RADIUS}
+              className="pointer-events-none absolute inset-0 h-full w-full"
+            />
+          )}
         </div>
       </div>
     </div>

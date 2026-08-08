@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { FeatureCollection, Point } from "geojson";
 import { WorldMap } from "@/components/WorldMap";
 import { USMap } from "@/components/USMap";
 import type { PlaceStatus } from "@/types/database";
@@ -17,6 +18,9 @@ interface DashboardMapsProps {
   countryStatuses: Record<string, PlaceStatus>;
   stateStatuses: Record<string, PlaceStatus>;
   trips: TripOption[];
+  parks: FeatureCollection<Point>;
+  parkStatuses: Record<string, PlaceStatus>;
+  unescoStatuses: Record<string, PlaceStatus>;
 }
 
 export function DashboardMaps({
@@ -24,6 +28,9 @@ export function DashboardMaps({
   countryStatuses,
   stateStatuses,
   trips,
+  parks,
+  parkStatuses,
+  unescoStatuses,
 }: DashboardMapsProps) {
   const [tab, setTab] = useState<Tab>("world");
   const [activeTripId, setActiveTripId] = useState<string | null>(null);
@@ -81,6 +88,7 @@ export function DashboardMaps({
           userId={userId}
           initialStatuses={countryStatuses}
           activeTripId={activeTripId}
+          initialUnescoStatuses={unescoStatuses}
         />
       </div>
       <div className={tab === "us" ? "flex flex-1" : "hidden"}>
@@ -88,6 +96,8 @@ export function DashboardMaps({
           userId={userId}
           initialStatuses={stateStatuses}
           activeTripId={activeTripId}
+          parks={parks}
+          initialParkStatuses={parkStatuses}
         />
       </div>
     </div>

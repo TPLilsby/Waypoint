@@ -63,8 +63,20 @@ wired for long.
     or not) rather than weighted by place count - see
     [docs/ARCHITECTURE.md](ARCHITECTURE.md#travel-day-heatmap-is-binary-not-weighted)
     for why finer-grained shading would be fabricated precision
-- [ ] **Phase 3 - Extra map layers**: national parks (NPS API) and UNESCO
+- [x] **Phase 3 - Extra map layers**: national parks (NPS API) and UNESCO
   World Heritage Sites as additional togglable layers
+  - [x] **3a - Point-marker rendering**: `PlaceMap` gained an optional
+    `pointRadius` prop so it can render point features (parks, sites) as
+    circles, reusing the same click/hover/persistence behavior as
+    polygon layers - see
+    [docs/ARCHITECTURE.md](ARCHITECTURE.md#national-parks-and-unesco-sites-are-point-layers-not-new-maps)
+  - [x] **3b - National parks**: live NPS API overlay on `USMap`, cached
+    for a day; requires an `NPS_API_KEY` in `.env.local`
+  - [x] **3c - UNESCO sites**: overlay on `WorldMap`, backed by a
+    committed static dataset (`src/data/unescoSites.json`) generated from
+    a Wikidata SPARQL query - the full ~1,247-site list rather than the
+    originally planned hand-curated subset, since an accurate structured
+    source turned out to exist
 - [ ] **Phase 4 - Real statistics**: distance from home, population/area
   coverage (REST Countries), language/currency exposure, historical weather
   on visit dates (Open-Meteo). This is also when the dashboard should move

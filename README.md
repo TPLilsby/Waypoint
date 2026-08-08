@@ -29,9 +29,10 @@ features. Current state:
 | Phase | Status |
 |---|---|
 | 0 - Project scaffold (Next.js, Supabase schema, RLS) | Done |
-| 1a - Auth (sign up, log in, log out, protected dashboard) | Done |
-| 1b - Interactive world map (countries, US states, persistence) | In progress |
-| 2-7 - Trips/timeline, extra map layers, statistics, public profiles, achievements | Planned |
+| 1 - Auth, interactive world/US maps, globe view | Done |
+| 2 - Trips, trip-to-place linking, travel-day heatmap | Done |
+| 3 - National park and UNESCO site map layers | Done |
+| 4-7 - Statistics, public profiles, achievements, polish | Planned |
 
 The full breakdown, including what's deliberately deferred and why, is in
 [docs/ROADMAP.md](docs/ROADMAP.md).
@@ -39,15 +40,17 @@ The full breakdown, including what's deliberately deferred and why, is in
 ## Features
 
 **Working today:**
-- Email/password authentication with Supabase Auth
-- A protected dashboard, only reachable when signed in
-- A world map rendering every country with a distinct decorative color
+- Email/password authentication with Supabase Auth, protected dashboard
+- Interactive world map and US state map - click to cycle
+  visited/want-to-visit, hover to see a "pop" effect, all saved to your
+  account
+- A draggable globe view of the world map (`geoOrthographic`, no WebGL)
+- National parks (live NPS API) and UNESCO World Heritage Sites (~1,247
+  sites, sourced from Wikidata) as togglable overlay layers
+- Trips: create/edit/delete, link places to a trip while marking them,
+  and a GitHub-style calendar heatmap of travel days
 
 **Planned, in build order:**
-- Click a country or US state to mark it visited or want-to-visit, saved
-  to your account
-- National parks and UNESCO World Heritage Sites as additional map layers
-- Trips that group places together with dates and notes
 - Real statistics: population/area coverage, distance from home, language
   and currency exposure, historical weather on visit dates
 - Public, shareable profile pages
@@ -63,9 +66,11 @@ The full breakdown, including what's deliberately deferred and why, is in
   (no map-provider API key, no WebGL) - see
   [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#map-rendering) for why this
   was chosen over `react-simple-maps` and hosted tile providers
-- Planned integrations: [REST Countries](https://restcountries.com), the
-  [NPS API](https://www.nps.gov/subjects/developer/api-documentation.htm),
-  and [Open-Meteo](https://open-meteo.com)
+- **[NPS API](https://www.nps.gov/subjects/developer/api-documentation.htm)**
+  for national parks; **Wikidata (SPARQL)** for UNESCO World Heritage
+  Site data, committed as static seed data
+- Planned integrations: [REST Countries](https://restcountries.com) and
+  [Open-Meteo](https://open-meteo.com), for phase 4's statistics
 
 Every part of the stack runs on a free tier - see
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#hosting-and-free-tier-notes)
@@ -73,7 +78,7 @@ for the specific limits and trade-offs that come with that choice.
 
 ## Screenshots
 
-_Coming soon, once the interactive map (phase 1b) is finished._
+_Coming soon._
 
 <!--
 Add screenshots here as the app takes shape, e.g.:
@@ -97,7 +102,8 @@ so they render on GitHub.
 npm install
 cp .env.example .env.local
 # fill in NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
-# from your Supabase project's Settings -> API page
+# from your Supabase project's Settings -> API page, and NPS_API_KEY
+# from https://www.nps.gov/subjects/developer/get-started.htm (free)
 ```
 
 Apply the database schema by running the SQL in
@@ -112,9 +118,11 @@ npm run dev
 
 ```
 src/
-  app/                 Next.js App Router routes (login, signup, dashboard)
-  components/          Shared UI, e.g. the world map
+  app/                 Next.js App Router routes (login, signup, dashboard, trips)
+  components/          Map, trip, and layout UI (PlaceMap, WorldMap, USMap, ...)
   lib/supabase/        Browser, server, and proxy Supabase clients
+  lib/                 Map data loaders (world/US/UNESCO topology, NPS API)
+  data/                Committed static datasets (UNESCO sites)
   types/database.ts    Hand-written types mirroring the Supabase schema
 supabase/
   migrations/          SQL schema migrations (source of truth for the data model)

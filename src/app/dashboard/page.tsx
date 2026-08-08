@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { DashboardMaps } from "@/components/DashboardMaps";
 import { createClient } from "@/lib/supabase/server";
+import { getNationalParks } from "@/lib/nationalParks";
 import type { PlaceStatus, PlaceType } from "@/types/database";
 
 export default async function DashboardPage() {
@@ -18,7 +19,7 @@ export default async function DashboardPage() {
     .from("places")
     .select("type, ref_code, status")
     .eq("user_id", user.id)
-    .in("type", ["country", "us_state"]);
+    .in("type", ["country", "us_state", "national_park", "unesco_site"]);
 
   if (error) {
     console.error("Failed to load saved places:", error.message);
@@ -44,12 +45,17 @@ export default async function DashboardPage() {
     console.error("Failed to load trips:", tripsError.message);
   }
 
+  const parks = await getNationalParks();
+
   return (
     <DashboardMaps
       userId={user.id}
       countryStatuses={statusesByType.country}
       stateStatuses={statusesByType.us_state}
       trips={trips ?? []}
+      parks={parks}
+      parkStatuses={statusesByType.national_park}
+      unescoStatuses={statusesByType.unesco_site}
     />
   );
 }
