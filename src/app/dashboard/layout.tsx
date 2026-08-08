@@ -27,6 +27,9 @@ export default async function DashboardLayout({
             <Link href="/dashboard/trips" className="text-ink hover:text-accent">
               Trips
             </Link>
+            <Link href="/dashboard/settings" className="text-ink hover:text-accent">
+              Settings
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">

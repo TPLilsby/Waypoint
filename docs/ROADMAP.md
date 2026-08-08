@@ -77,12 +77,25 @@ wired for long.
     a Wikidata SPARQL query - the full ~1,247-site list rather than the
     originally planned hand-curated subset, since an accurate structured
     source turned out to exist
-- [ ] **Phase 4 - Real statistics**: distance from home, population/area
+- [x] **Phase 4 - Real statistics**: distance from home, population/area
   coverage (REST Countries), language/currency exposure, historical weather
-  on visit dates (Open-Meteo). This is also when the dashboard should move
-  from a full-width map (as built in 1b-i) to the asymmetric 2:1 map/sidebar
-  layout from [docs/DESIGN.md](DESIGN.md#layout-and-composition) - deferred
-  until there's real sidebar content instead of an empty placeholder column
+  on visit dates (Open-Meteo)
+  - [x] **4a - Sidebar layout**: the dashboard moved from a full-width map
+    (as built in 1b-i) to the asymmetric 2:1 map/sidebar layout from
+    [docs/DESIGN.md](DESIGN.md#layout-and-composition), now that there's
+    real sidebar content instead of an empty placeholder column
+  - [x] **4b - Coverage stats**: visited/want-to-visit counts per place
+    type, plus % of world population/area and unique languages/currencies
+    from REST Countries - see
+    [docs/ARCHITECTURE.md](ARCHITECTURE.md#populationarealanguagecurrency-coverage)
+    for why that integration looks different from the original plan
+  - [x] **4c - Distance from home**: a configurable home location
+    (`/dashboard/settings`, `profiles.home_lat`/`home_lng`) rather than a
+    hardcoded one, plus furthest-visited-place and average-distance stats
+  - [x] **4d - Historical weather**: dated by a visited place's linked
+    trip's `start_date`, since places themselves don't store a specific
+    visit date - see
+    [docs/ARCHITECTURE.md](ARCHITECTURE.md#weather-is-dated-by-trip-not-by-place)
 - [ ] **Phase 5 - Public profiles**: `/u/[slug]` read-only shareable view,
   overlap comparison between two users' visited places
 - [ ] **Phase 6 - Achievements**: milestone badges and records (e.g.

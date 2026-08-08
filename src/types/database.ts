@@ -20,6 +20,9 @@ export type Database = {
           username: string
           slug: string
           is_public: boolean
+          home_name: string | null
+          home_lat: number | null
+          home_lng: number | null
           created_at: string
         }
         Insert: {
@@ -27,6 +30,9 @@ export type Database = {
           username: string
           slug: string
           is_public?: boolean
+          home_name?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
           created_at?: string
         }
         Update: {
@@ -34,6 +40,9 @@ export type Database = {
           username?: string
           slug?: string
           is_public?: boolean
+          home_name?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
           created_at?: string
         }
         Relationships: []

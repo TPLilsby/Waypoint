@@ -32,7 +32,8 @@ features. Current state:
 | 1 - Auth, interactive world/US maps, globe view | Done |
 | 2 - Trips, trip-to-place linking, travel-day heatmap | Done |
 | 3 - National park and UNESCO site map layers | Done |
-| 4-7 - Statistics, public profiles, achievements, polish | Planned |
+| 4 - Statistics: coverage, distance from home, weather | Done |
+| 5-7 - Public profiles, achievements, polish | Planned |
 
 The full breakdown, including what's deliberately deferred and why, is in
 [docs/ROADMAP.md](docs/ROADMAP.md).
@@ -49,10 +50,11 @@ The full breakdown, including what's deliberately deferred and why, is in
   sites, sourced from Wikidata) as togglable overlay layers
 - Trips: create/edit/delete, link places to a trip while marking them,
   and a GitHub-style calendar heatmap of travel days
+- A stats sidebar: coverage counts, % of world population/area visited,
+  languages/currencies encountered, distance from a configurable home
+  location, and historical weather on your trips
 
 **Planned, in build order:**
-- Real statistics: population/area coverage, distance from home, language
-  and currency exposure, historical weather on visit dates
 - Public, shareable profile pages
 - Achievements computed from your data, not stored separately
 
@@ -69,8 +71,10 @@ The full breakdown, including what's deliberately deferred and why, is in
 - **[NPS API](https://www.nps.gov/subjects/developer/api-documentation.htm)**
   for national parks; **Wikidata (SPARQL)** for UNESCO World Heritage
   Site data, committed as static seed data
-- Planned integrations: [REST Countries](https://restcountries.com) and
-  [Open-Meteo](https://open-meteo.com), for phase 4's statistics
+- **[REST Countries (v5)](https://restcountries.com)** for
+  population/area/language/currency coverage, and
+  **[Open-Meteo](https://open-meteo.com)** for historical weather - both
+  used for the phase 4 stats sidebar
 
 Every part of the stack runs on a free tier - see
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#hosting-and-free-tier-notes)
@@ -101,14 +105,14 @@ so they render on GitHub.
 ```bash
 npm install
 cp .env.example .env.local
-# fill in NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
-# from your Supabase project's Settings -> API page, and NPS_API_KEY
-# from https://www.nps.gov/subjects/developer/get-started.htm (free)
+# fill in NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY from
+# your Supabase project's Settings -> API page, NPS_API_KEY from
+# https://www.nps.gov/subjects/developer/get-started.htm, and
+# RESTCOUNTRIES_API_KEY from https://restcountries.com/sign-up (both free)
 ```
 
-Apply the database schema by running the SQL in
-`supabase/migrations/20260803215332_initial_schema.sql` through the
-Supabase SQL Editor, then start the app:
+Apply the database schema by running each file in `supabase/migrations/`,
+in order, through the Supabase SQL Editor, then start the app:
 
 ```bash
 npm run dev
@@ -118,10 +122,10 @@ npm run dev
 
 ```
 src/
-  app/                 Next.js App Router routes (login, signup, dashboard, trips)
-  components/          Map, trip, and layout UI (PlaceMap, WorldMap, USMap, ...)
+  app/                 Next.js App Router routes (login, signup, dashboard, trips, settings)
+  components/          Map, trip, stats, and layout UI (PlaceMap, WorldMap, USMap, ...)
   lib/supabase/        Browser, server, and proxy Supabase clients
-  lib/                 Map data loaders (world/US/UNESCO topology, NPS API)
+  lib/                 Map/stats data loaders (topology, NPS, REST Countries, Open-Meteo)
   data/                Committed static datasets (UNESCO sites)
   types/database.ts    Hand-written types mirroring the Supabase schema
 supabase/

@@ -296,11 +296,65 @@ The two layers use deliberately different data strategies:
   (`src/lib/unescoTopology.ts` loads it directly), not re-fetched, since
   World Heritage listings change a few times a year at most.
 
+## Statistics (phase 4)
+
+### Home location is per-user data, not a constant
+
+`profiles.home_lat`/`home_lng`/`home_name` (set on
+`/dashboard/settings`) back the distance-from-home stat, rather than a
+hardcoded coordinate for one person. The plan going in was to hardcode
+it - this is a single-user-scale project - but a settings page costs
+little and means the "distance from home" stat is actually correct
+if anyone else ever runs their own copy of Waypoint, not just accurate
+for the original author.
+
+### Distance uses the haversine formula
+
+`src/lib/distance.ts` computes great-circle distance between two
+lat/lng points. Not the more precise Vincenty formula - the difference
+is a fraction of a percent, which doesn't matter for a "how far have you
+traveled" stat, and haversine is simple enough to hand-write without a
+dependency.
+
+### Weather is dated by trip, not by place
+
+Historical weather (`src/lib/weather.ts`, via Open-Meteo) needs a date,
+but `places` doesn't store one - there's no UI for "which day did you
+visit this" (see [docs/ROADMAP.md](ROADMAP.md), phase 4d). Instead, a
+visited place linked to a trip borrows that trip's `start_date` as an
+approximate visit date. This is stated explicitly in the UI
+(`StatsSidebar`) rather than presented as exact, and a place with no
+linked trip simply has no weather entry - there's nothing to
+approximate from.
+
+### Population/area/language/currency coverage
+
+REST Countries changed significantly after this project's original plan
+was written: the free, unpaginated v3.1 API used in early drafts of this
+document has been shut down entirely, replaced by a v5 API
+(`api.restcountries.com/countries/v5`) that requires a free-tier API key
+(`restcountries.com/sign-up`) and caps requests at 100 countries per
+page. `src/lib/restCountries.ts` pages through with `offset`/`limit`
+until the response's `meta.more` flag is `false`, then caches the full
+result for a week - country population/area doesn't change meaningfully
+day to day, so there's no reason to re-fetch (let alone re-paginate) on
+every dashboard load.
+
+`ccn3` (the numeric ISO-3166-1 code) in this API's response matches our
+`ref_code` for countries exactly, since both ultimately trace back to
+the same ISO standard `world-atlas` also uses - no lookup table needed,
+same reasoning as the national parks and UNESCO layers.
+
+If `RESTCOUNTRIES_API_KEY` isn't set, `getCountryStats()` returns `null`
+and the sidebar shows "not available" for this section instead of
+crashing the page - the same graceful-degradation pattern used for a
+missing `NPS_API_KEY`.
+
 ## Third-party data sources
 
 | Source | Used for | Why this one |
 |---|---|---|
-| REST Countries | Population, area, languages, currencies | Free, no key, no rate limit concerns for this scale |
+| REST Countries (v5) | Population, area, languages, currencies | Free-tier key required (API changed after this project's original plan - see above); paginated at 100/request |
 | NPS API | The 63 US national parks | Official, free, real API integration (not static data) |
 | Wikidata (SPARQL) | UNESCO World Heritage Site names and coordinates | Free, no key, structured and queryable - see below for why this replaced the originally planned hand-curated list |
 | Open-Meteo | Historical weather for visit dates | Free, no key, has historical data going back decades |
