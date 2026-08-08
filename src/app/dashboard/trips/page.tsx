@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { NewTripForm } from "@/components/NewTripForm";
 import { TripRow } from "@/components/TripRow";
+import { TravelHeatmap } from "@/components/TravelHeatmap";
 
 export default async function TripsPage() {
   const supabase = await createClient();
@@ -45,6 +46,7 @@ export default async function TripsPage() {
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
       <h1 className="font-heading text-2xl text-ink">Trips</h1>
+      <TravelHeatmap trips={trips ?? []} />
       <NewTripForm />
       <div className="flex flex-col gap-3">
         {(trips ?? []).map((trip) => (

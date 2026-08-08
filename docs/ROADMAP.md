@@ -46,7 +46,7 @@ wired for long.
     orthographic's hemisphere clipping is a meaningfully harder problem).
     Revisit only if there's a specific reason to invest in it - the
     toggle already delivers the promised feel
-- [ ] **Phase 2 - Trips and timeline**: group places into trips with dates,
+- [x] **Phase 2 - Trips and timeline**: group places into trips with dates,
   chronological timeline / calendar-heatmap of travel days
   - [x] **2a - Trip CRUD**: `/dashboard/trips` page - create/edit/delete
     trips (title, start/end date, note) via Server Actions, separate from
@@ -58,8 +58,11 @@ wired for long.
   - [x] **2c - Chronological trip list**: trips shown oldest-first with a
     count of places in each, which doubles as a correctness check on 2b -
     the count is only right if trip assignment actually worked
-  - [ ] **2d - Calendar heatmap**: a GitHub-contributions-style view of
-    travel days, built after 2c once there's real trip data to visualize
+  - [x] **2d - Calendar heatmap**: a GitHub-contributions-style grid of
+    the last 12 months on `/dashboard/trips`, binary per day (traveling
+    or not) rather than weighted by place count - see
+    [docs/ARCHITECTURE.md](ARCHITECTURE.md#travel-day-heatmap-is-binary-not-weighted)
+    for why finer-grained shading would be fabricated precision
 - [ ] **Phase 3 - Extra map layers**: national parks (NPS API) and UNESCO
   World Heritage Sites as additional togglable layers
 - [ ] **Phase 4 - Real statistics**: distance from home, population/area

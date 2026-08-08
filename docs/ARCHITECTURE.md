@@ -41,6 +41,18 @@ sync - miss one update path and a badge silently goes stale. Computing them
 on read costs a bit more at query time, which is a fine trade for a
 personal-scale dataset.
 
+### Travel day heatmap is binary, not weighted
+
+`src/lib/travelDays.ts` marks every calendar day inside a trip's
+start/end range as a "travel day," rendered as a single-intensity
+GitHub-contributions-style grid (`src/components/TravelHeatmap.tsx`).
+There's no lighter/darker shading based on how many places were marked
+visited during that trip - we only know a place was visited *sometime*
+within the trip's date range, not which specific day. Distributing a
+trip's place count evenly across its days to fake a heavier/lighter
+shade would look more sophisticated but would be manufactured precision
+the underlying data doesn't actually have.
+
 ## Auth and Row Level Security
 
 Waypoint uses Supabase Auth with three client entry points, following the
